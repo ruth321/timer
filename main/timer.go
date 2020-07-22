@@ -6,56 +6,55 @@ import (
 )
 
 func main() {
-	//НЕ УДАЛЯТЬ!!!
+	//НЕ УДАЛЯТЬ!!!1!11
 	var in string
+	t := 5
+	c := make(chan string, 2)
+	d := make(chan string, 1)
+	go timeLim(c, t)
 	for i := 0; i < 3; i++ {
-		c := make(chan string)
-		go timeLim(c)
 		go input(c)
 		//go timer(c)
 		fmt.Println("question: 5+5")
-		fmt.Print("answer:")
+		fmt.Print("answer: ")
+		go timer(d, t)
 		in = <-c
 		if in == "end" {
 			fmt.Println("end of time")
+			break
+		} else {
+			d <- "stop"
 		}
 		fmt.Println(in)
 	}
-
-	/*
-		fmt.Print("Time: ")
-		for i := 5; i > 0; i-- {
-			fmt.Print(i)
-			time.Sleep(time.Second)
-			fmt.Printf("\r\b\r")
-		}
-	*/
-
+	fmt.Print("asdjkasdl")
 }
 
-func timeLim(c chan string) {
-	time.Sleep(time.Second * 3)
+func timeLim(c chan string, t int) {
+	time.Sleep(time.Second * time.Duration(t))
 	if len(c) != 0 {
 		return
 	}
 	c <- "end"
+	close(c)
 }
 
 func input(c chan string) {
 	var s string
+	_, _ = fmt.Scan(&s)
 	if len(c) != 0 {
 		return
 	}
-	_, _ = fmt.Scan(&s)
 	c <- s
 }
 
-func timer(c chan string) {
-	if len(c) == 0 {
-		for i := 3; i > 0; i-- {
-			fmt.Print(i, "): ")
+func timer(d chan string, t int) {
+	for i := t; i > 0; i-- {
+		if s := <-d; s != "stop" {
+			fmt.Printf("\ranswer(%d): ", i)
 			time.Sleep(time.Second)
-			fmt.Printf("\b\b\b\b")
+		} else {
+			return
 		}
 	}
 }
